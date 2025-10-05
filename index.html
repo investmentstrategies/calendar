@@ -553,6 +553,8 @@ function renderTaskList(){
     document.getElementById('edit-date').value = task.due || '';
     document.getElementById('edit-course').value = task.courseId || '';
 document.getElementById('edit-notes').value = task.notes || '';
+  dayModal.style.display = 'none';
+
     editModal.style.display = 'flex';
   }
 
