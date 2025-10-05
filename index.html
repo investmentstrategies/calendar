@@ -1,198 +1,101 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Task Calendar</title>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Task Calendar (with anonymous auth)</title>
 <style>
-  * { box-sizing: border-box; }
-  body {
-    font-family: 'Inter', sans-serif;
-    margin: 0;
-    background: #f7f9fb;
-    color: #222;
-  }
-  header {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1rem 2rem;
-    background: white;
-    border-bottom: 1px solid #ddd;
-  }
-  h1 { font-size: 1.5rem; margin: 0; }
-  .controls { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-  input, select, button {
-    padding: 0.4rem 0.6rem;
-    border-radius: 6px;
-    border: 1px solid #ccc;
-    font-size: 0.9rem;
-  }
-  button {
-    cursor: pointer;
-    background: #007aff;
-    color: white;
-    border: none;
-    transition: background 0.2s;
-  }
-  button:hover { background: #005fd1; }
-  main {
-    display: grid;
-    grid-template-columns: 3fr 1fr;
-    min-height: calc(100vh - 70px);
-  }
-  #calendar {
-    padding: 1rem;
-    background: #fff;
-  }
-  #tasks-list {
-    border-left: 1px solid #ddd;
-    padding: 1rem;
-    background: #fafafa;
-    overflow-y: auto;
-  }
-  .grid {
-    display: grid;
-    grid-template-columns: repeat(7, 1fr);
-    gap: 4px;
-  }
-  .flex { display: flex; gap: 4px; }
-  .col {
-    flex: 1;
-    border: 1px solid #eee;
-    background: #fff;
-    padding: 6px;
-    border-radius: 6px;
-    min-height: 600px;
-  }
-  .day-cell {
-    border: 1px solid #eaeaea;
-    background: #fff;
-    border-radius: 6px;
-    padding: 4px;
-    min-height: 110px;
-    cursor: pointer;
-    transition: background 0.2s;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  .day-cell:hover { background: #f0f9ff; }
-  .day-number {
-    font-size: 0.8rem;
-    color: #333;
-  }
-  .day-dots {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 3px;
-  }
-  .dot {
-    width: 10px;
-    height: 10px;
-    border-radius: 50%;
-  }
-  .task-row {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 6px;
-    margin-bottom: 6px;
-    padding: 6px;
-    cursor: pointer;
-    transition: background 0.2s;
-  }
-  .task-row:hover { background: #f0f9ff; }
-  .icon {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-  }
-  #modal-backdrop, #day-modal {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.4);
-    align-items: center;
-    justify-content: center;
-    z-index: 100;
-  }
-  .modal {
-    background: white;
-    border-radius: 8px;
-    padding: 1rem;
-    width: 90%;
-    max-width: 420px;
-  }
-    
-    .day-number {
-  font-weight: 600;
-  margin-bottom: 4px;
-  color: #222;
+  *{box-sizing:border-box}
+  body{font-family:Inter,system-ui,Arial;margin:0;background:#f7f9fb;color:#222}
+  header{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;padding:1rem 1.5rem;background:#fff;border-bottom:1px solid #e6eef0}
+  h1{margin:0;font-size:1.25rem}
+  .controls{display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap}
+  input,select,button{padding:0.45rem 0.6rem;border-radius:6px;border:1px solid #cfd8e3;font-size:0.95rem}
+  button{cursor:pointer;background:#007aff;color:#fff;border:0}
+  button:hover{background:#005fd1}
+  .view-btn.active{background:#005fd1}
+  main{display:grid;grid-template-columns:3fr 1fr;min-height:calc(100vh - 72px)}
+  #calendar{padding:1rem;background:#fff}
+  #tasks-list{border-left:1px solid #e6eef0;padding:1rem;background:#fafafa;overflow:auto}
+  .grid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+  .flex{display:flex;gap:6px}
+  .col{flex:1;border:1px solid #eef2f6;background:#fff;padding:8px;border-radius:8px;min-height:600px}
+  .day-cell{border:1px solid #eef2f6;border-radius:8px;padding:8px;min-height:110px;display:flex;flex-direction:column;justify-content:space-between;cursor:pointer}
+  .day-cell:hover{background:#f0f9ff}
+  .day-number{font-weight:600;margin-bottom:6px}
+.day-dots {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-  .modal h3 { margin-top: 0; }
-  .btn { margin-top: 8px; width: 100%; }
-  @media (max-width: 800px) {
-    main { grid-template-columns: 1fr; }
-    #tasks-list { border-left: none; border-top: 1px solid #ddd; }
-    .col { min-height: 400px; }
-  }
+  .dot{width:10px;height:10px;border-radius:999px}
+  .task-row{display:flex;gap:8px;align-items:center;padding:8px;border-radius:8px;border:1px solid #eef2f6;background:#fff;margin-bottom:8px;cursor:pointer}
+  .icon{width:14px;height:14px;border-radius:50%}
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(2,6,23,0.45);align-items:center;justify-content:center;z-index:200}
+  .modal{background:#fff;padding:14px;border-radius:10px;min-width:320px;max-width:420px}
+  #course-list div{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+  .del-course{background:#dc3545;border:0;color:#fff;padding:2px 6px;border-radius:4px;cursor:pointer}
+  .del-course:hover{background:#b22222}
+  @media (max-width:900px){main{grid-template-columns:1fr} .col{min-height:420px}}
 </style>
 </head>
 <body>
 <header>
   <h1>📅 Task Calendar</h1>
+
   <div class="controls">
-    <button class="view-btn" data-view="month">Month</button>
+    <button class="view-btn active" data-view="month">Month</button>
     <button class="view-btn" data-view="week">Week</button>
     <button class="view-btn" data-view="3day">3 Day</button>
     <button class="view-btn" data-view="day">Day</button>
     <button id="prev-btn">◀</button>
-    <span id="current-range">October 2025</span>
+    <div id="current-range" style="min-width:160px;text-align:center">—</div>
     <button id="next-btn">▶</button>
   </div>
+
   <div class="controls">
-    <input id="task-title" placeholder="New Task title">
-    <input id="task-date" type="date">
-    <select id="task-course"></select>
+    <input id="task-title" placeholder="New task title" />
+    <input id="task-date" type="date" />
+    <select id="task-course"><option value="">Select course</option></select>
     <button id="add-task">+ Task</button>
-    <input id="course-name" placeholder="New Course">
-    <input id="course-color" type="color" value="#007aff">
+
+    <input id="course-name" placeholder="Course name" />
+    <input id="course-color" type="color" value="#34d399" />
     <button id="add-course">+ Course</button>
   </div>
 </header>
 
 <main>
-  <div id="calendar"></div>
-  <div id="tasks-list">
-    <h3>Upcoming Tasks</h3>
+  <section id="calendar"></section>
+
+  <aside id="tasks-list">
+    <h3 style="margin:0 0 8px 0">Upcoming tasks</h3>
     <div id="task-items"></div>
-  </div>
+    <h4 style="margin-top:16px">Courses</h4>
+    <div id="course-list"></div>
+  </aside>
 </main>
 
-<!-- Edit Modal -->
-<div id="modal-backdrop">
+<!-- Edit modal -->
+<div id="edit-modal" class="modal-backdrop" style="display:none">
   <div class="modal">
-    <h3>Edit Task</h3>
-    <input id="edit-title">
-    <input id="edit-date" type="date">
-    <select id="edit-course"></select>
+    <h3>Edit task</h3>
+    <input id="edit-title" placeholder="Title" style="width:100%;margin-bottom:8px" />
+    <input id="edit-date" type="date" style="width:100%;margin-bottom:8px" />
+    <select id="edit-course" style="width:100%;margin-bottom:8px"></select>
     <button id="save-edit" class="btn">Save</button>
-    <button id="delete-task" class="btn" style="background:#dc3545">Delete</button>
-    <button id="close-modal" class="btn">Cancel</button>
+    <button id="delete-task" class="btn" style="background:#dc3545;margin-top:8px">Delete</button>
+    <button id="close-edit" class="btn" style="margin-top:8px">Cancel</button>
   </div>
 </div>
 
-<!-- Day Modal -->
-<div id="day-modal">
-  <div class="modal" id="day-modal-box">
-    <h3 id="day-modal-title">Tasks for this day</h3>
-    <div id="day-modal-list"></div>
-    <button id="day-modal-close" class="btn" style="margin-top:8px;">Close</button>
+<!-- Day modal -->
+<div id="day-modal" class="modal-backdrop" style="display:none">
+  <div class="modal">
+    <h3 id="day-modal-title">Tasks</h3>
+    <div id="day-modal-list" style="margin-top:8px"></div>
+    <button id="day-modal-close" class="btn" style="margin-top:10px">Close</button>
   </div>
 </div>
 
@@ -200,219 +103,304 @@
   import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
   import {
     getFirestore, collection, addDoc, getDocs, updateDoc,
-    deleteDoc, doc
+    deleteDoc, doc, query, where
   } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-  // 🔥 Replace with your actual Firebase config
+  // your firebase config (kept from your original)
   const firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT.firebaseapp.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT.appspot.com",
-    messagingSenderId: "YOUR_SENDER_ID",
-    appId: "YOUR_APP_ID"
+    apiKey: "AIzaSyAOBVIdoqsqRDTXEY6eqqAA6ExP8I1ebfg",
+    authDomain: "schoolcalendar-710c6.firebaseapp.com",
+    projectId: "schoolcalendar-710c6",
+    storageBucket: "schoolcalendar-710c6.firebasestorage.app",
+    messagingSenderId: "575237972641",
+    appId: "1:575237972641:web:ad61b4f094a96f31ec46e0"
   };
 
+  // init
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
+  const auth = getAuth(app);
 
+  // state
+  let userId = null;
   let currentDate = new Date();
   let viewMode = "month";
   let courses = {};
   let tasks = [];
-  let editingTaskId = null;
+  let editingTask = null;
 
-  const calendarEl = document.getElementById("calendar");
-  const taskListEl = document.getElementById("task-items");
-  const courseSelect = document.getElementById("task-course");
-  const editCourseSelect = document.getElementById("edit-course");
-  const modal = document.getElementById("modal-backdrop");
-  const editTitle = document.getElementById("edit-title");
-  const editDate = document.getElementById("edit-date");
-  const dayModal = document.getElementById("day-modal");
-  const dayModalTitle = document.getElementById("day-modal-title");
-  const dayModalList = document.getElementById("day-modal-list");
+  // DOM
+  const calendarEl = document.getElementById('calendar');
+  const courseSelect = document.getElementById('task-course');
+  const editCourseSelect = document.getElementById('edit-course');
+  const taskItems = document.getElementById('task-items');
+  const currentRange = document.getElementById('current-range');
+  const courseList = document.getElementById('course-list');
+  const editModal = document.getElementById('edit-modal');
+  const dayModal = document.getElementById('day-modal');
 
-  document.getElementById("day-modal-close").addEventListener('click', ()=> dayModal.style.display='none');
-  document.getElementById("close-modal").addEventListener("click", ()=>modal.style.display="none");
-  document.getElementById("save-edit").addEventListener("click", saveEdit);
-  document.getElementById("delete-task").addEventListener("click", deleteTask);
-  document.getElementById("prev-btn").addEventListener("click", ()=>changeRange(-1));
-  document.getElementById("next-btn").addEventListener("click", ()=>changeRange(1));
-  document.getElementById("add-course").addEventListener("click", addCourse);
-  document.getElementById("add-task").addEventListener("click", addTask);
+  // buttons
+  document.getElementById('add-course').addEventListener('click', addCourse);
+  document.getElementById('add-task').addEventListener('click', addTask);
+  document.getElementById('prev-btn').addEventListener('click', ()=> changeRange(-1));
+  document.getElementById('next-btn').addEventListener('click', ()=> changeRange(1));
+  document.getElementById('close-edit').addEventListener('click', ()=> editModal.style.display='none');
+  document.getElementById('day-modal-close').addEventListener('click', ()=> dayModal.style.display='none');
+  document.getElementById('save-edit').addEventListener('click', saveEdit);
+  document.getElementById('delete-task').addEventListener('click', deleteCurrentTask);
 
-  document.querySelectorAll(".view-btn").forEach(btn=>{
-    btn.addEventListener("click", ()=>{
+  document.querySelectorAll('.view-btn').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      document.querySelectorAll('.view-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
       viewMode = btn.dataset.view;
       renderCalendar();
     });
   });
 
-  function changeRange(dir){
-    if(viewMode=="month"){ currentDate.setMonth(currentDate.getMonth()+dir); }
-    else { currentDate.setDate(currentDate.getDate() + (viewMode=="week"?7:(viewMode=="3day"?3:1))*dir); }
-    renderCalendar();
-  }
+  // anonymous auth
+  signInAnonymously(auth).catch(err=>{
+    console.warn('Anonymous sign-in failed:', err.message);
+  });
 
+  onAuthStateChanged(auth, user=>{
+    userId = user ? user.uid : null;
+    loadData();
+  });
+
+  // ----- add course -----
   async function addCourse(){
-    const name = document.getElementById("course-name").value.trim();
-    const color = document.getElementById("course-color").value;
-    if(!name) return alert("Enter a course name");
-    const ref = await addDoc(collection(db, "courses"), { name, color });
-    courses[ref.id] = { name, color };
-    updateCourseSelects();
-    document.getElementById("course-name").value="";
-  }
-
-  async function addTask(){
-    const title = document.getElementById("task-title").value.trim();
-    const date = document.getElementById("task-date").value;
-    const courseId = courseSelect.value;
-    if(!title || !date || !courseId) return alert("Fill all fields");
-    const ref = await addDoc(collection(db, "tasks"), { title, due: date, courseId });
-    tasks.push({ id: ref.id, title, due: date, courseId });
-    document.getElementById("task-title").value="";
-    render();
-  }
-
-  function openEditModal(task){
-    modal.style.display="flex";
-    editingTaskId = task.id;
-    editTitle.value = task.title;
-    editDate.value = task.due;
-    editCourseSelect.value = task.courseId;
-  }
-
-  async function saveEdit(){
-    if(!editingTaskId) return;
-    const ref = doc(db, "tasks", editingTaskId);
-    const title = editTitle.value;
-    const due = editDate.value;
-    const courseId = editCourseSelect.value;
-    await updateDoc(ref, { title, due, courseId });
-    tasks = tasks.map(t=>t.id==editingTaskId?{...t, title, due, courseId}:t);
-    modal.style.display="none"; render();
-  }
-
-  async function deleteTask(){
-    if(!editingTaskId) return;
-    await deleteDoc(doc(db,"tasks",editingTaskId));
-    tasks = tasks.filter(t=>t.id!=editingTaskId);
-    modal.style.display="none"; render();
-  }
-
-  function openDayTasksModal(date, list){
-    dayModal.style.display='flex';
-    dayModalTitle.textContent = `Tasks for ${date.toLocaleDateString()}`;
-    dayModalList.innerHTML='';
-    if(list.length===0){
-      dayModalList.innerHTML='<div class="small muted">No tasks</div>';
-      return;
+    const name = document.getElementById('course-name').value.trim();
+    const color = document.getElementById('course-color').value;
+    if(!name) return alert('Enter a course name');
+    try{
+      const payload = { name, color, uid: userId };
+      const ref = await addDoc(collection(db,'courses'), payload);
+      // update local state (optimistic)
+      courses[ref.id] = payload;
+      document.getElementById('course-name').value = '';
+      updateCourseSelects();
+      renderCourseList();
+    }catch(err){
+      console.error('Add course failed', err);
+      alert('Failed to add course: ' + (err.message || err));
     }
-    list.forEach(t=>{
-      const el = document.createElement('div');
-      el.className='task-row';
-      const icon=document.createElement('span');
-      icon.className='icon';
-      icon.style.background=courses[t.courseId]?.color || '#777';
-      const text=document.createElement('div');
-      text.textContent=`${t.title} • ${courses[t.courseId]?.name||''}`;
-      el.appendChild(icon);
-      el.appendChild(text);
-      el.addEventListener('click',()=>openEditModal(t));
-      dayModalList.appendChild(el);
-    });
   }
 
+  // ----- delete course (and its tasks) -----
+  async function deleteCourse(id){
+    if(!confirm('Delete this course and ALL its tasks? This cannot be undone.')) return;
+    try{
+      // delete course doc
+      await deleteDoc(doc(db,'courses',id));
+      // find tasks for that course and delete them
+      const q = query(collection(db,'tasks'), where('courseId','==', id), where('uid','==', userId));
+      const snap = await getDocs(q);
+      const deletions = [];
+      snap.forEach(s => deletions.push(deleteDoc(doc(db,'tasks', s.id))));
+      await Promise.all(deletions);
+
+      // update local state
+      tasks = tasks.filter(t => t.courseId !== id);
+      delete courses[id];
+      updateCourseSelects();
+      renderCourseList();
+      render();
+    }catch(err){
+      console.error('Delete course failed', err);
+      alert('Failed to delete course: ' + (err.message || err));
+    }
+  }
+
+  // ----- add task -----
+  async function addTask(){
+    const title = document.getElementById('task-title').value.trim();
+    const due = document.getElementById('task-date').value;
+    const courseId = courseSelect.value;
+    if(!title || !due || !courseId) return alert('Fill all task fields');
+    try{
+      const payload = { title, due, courseId, uid: userId };
+      const ref = await addDoc(collection(db,'tasks'), payload);
+      tasks.push({ id: ref.id, ...payload });
+      document.getElementById('task-title').value = '';
+      document.getElementById('task-date').value = '';
+      render();
+    }catch(err){
+      console.error('Add task failed', err);
+      alert('Failed to add task: ' + (err.message || err));
+    }
+  }
+
+  // ----- delete currently editing task -----
+  async function deleteCurrentTask(){
+    if(!editingTask) return;
+    if(!confirm('Delete this task?')) return;
+    try{
+      await deleteDoc(doc(db,'tasks', editingTask.id));
+      tasks = tasks.filter(t => t.id !== editingTask.id);
+      editingTask = null;
+      editModal.style.display = 'none';
+      render();
+    }catch(err){
+      console.error('Delete failed', err);
+      alert('Delete failed: ' + (err.message || err));
+    }
+  }
+
+  // ----- load data (courses + tasks for this user) -----
+  async function loadData(){
+    try{
+      if(!userId){
+        // no user yet - clear local state
+        courses = {};
+        tasks = [];
+        updateCourseSelects();
+        renderCourseList();
+        render();
+        return;
+      }
+
+      // load courses for this uid
+      const courseSnap = await getDocs(query(collection(db,'courses'), where('uid','==', userId)));
+      courses = {};
+      courseSnap.forEach(d => courses[d.id] = d.data());
+
+      // load tasks for this uid
+      const taskSnap = await getDocs(query(collection(db,'tasks'), where('uid','==', userId)));
+      tasks = [];
+      taskSnap.forEach(d => tasks.push({ id: d.id, ...d.data() }));
+
+      updateCourseSelects();
+      renderCourseList();
+      render();
+    }catch(err){
+      console.error('loadData failed', err);
+      // keep UI from crashing
+    }
+  }
+
+  // ----- update selects -----
   function updateCourseSelects(){
-    const opts = Object.entries(courses).map(([id,c])=>`<option value="${id}">${c.name}</option>`).join("");
-    courseSelect.innerHTML = '<option value="">Select Course</option>' + opts;
+    const opts = Object.keys(courses).map(id => `<option value="${id}">${courses[id].name}</option>`).join('');
+    courseSelect.innerHTML = '<option value="">Select course</option>' + opts;
     editCourseSelect.innerHTML = opts;
   }
 
-function renderCalendar(){
-  calendarEl.innerHTML = "";
-  let start, days;
-  const header = document.getElementById("current-range");
-
-  if(viewMode=="month"){
-    const year=currentDate.getFullYear(), month=currentDate.getMonth();
-    start=new Date(year, month, 1);
-    const firstDay=start.getDay();
-    start.setDate(start.getDate()-firstDay);
-    days=42;
-    header.textContent=`${currentDate.toLocaleString('default',{month:'long'})} ${year}`;
-  }else if(viewMode=="week"){
-    start=new Date(currentDate);
-    start.setDate(start.getDate()-start.getDay());
-    days=7;
-    header.textContent=`Week of ${start.toLocaleDateString()}`;
-  }else if(viewMode=="3day"){
-    start=new Date(currentDate);
-    days=3;
-    const end = new Date(start.getTime()+2*86400000);
-    header.textContent=`${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
-  }else{
-    start=new Date(currentDate);
-    days=1;
-    header.textContent=currentDate.toDateString();
+  // ----- course list UI (delete buttons) -----
+  function renderCourseList(){
+    if(Object.keys(courses).length === 0){
+      courseList.innerHTML = '<em>No courses</em>';
+      return;
+    }
+    courseList.innerHTML = Object.entries(courses).map(([id,c])=>
+      `<div><span style="display:flex;align-items:center;gap:6px"><span style="width:12px;height:12px;background:${c.color};border-radius:50%"></span>${c.name}</span><button class="del-course" data-id="${id}">✕</button></div>`
+    ).join('');
+    courseList.querySelectorAll('.del-course').forEach(btn => btn.onclick = ()=> deleteCourse(btn.dataset.id));
   }
 
-  const grid=document.createElement("div");
-  grid.className=viewMode=="month"?"grid":"flex";
+  // ----- helpers for rendering calendar/tasks -----
+  function formatFullDate(d){
+    const weekday = d.toLocaleDateString(undefined,{weekday:'long'});
+    const month = d.toLocaleDateString(undefined,{month:'long'});
+    return `${weekday} ${d.getDate()} ${month}`;
+  }
 
-  for(let i=0;i<days;i++){
-    const d=new Date(start);
-    d.setDate(start.getDate()+i);
+ function renderCalendar() {
+  calendarEl.innerHTML = '';
+  let start, days;
+  if (viewMode === 'month') {
+    const y = currentDate.getFullYear(), m = currentDate.getMonth();
+    start = new Date(y, m, 1);
+    const firstDay = (start.getDay() + 6) % 7;
+    start.setDate(start.getDate() - firstDay);
+    days = 42;
+    currentRange.textContent = currentDate.toLocaleString(undefined, { month: 'long', year: 'numeric' });
+  } else if (viewMode === 'week') {
+    start = new Date(currentDate);
+    const day = start.getDay();
+    const diff = (day === 0 ? -6 : 1 - day);
+    start.setDate(start.getDate() + diff);
+    days = 7;
+    const end = new Date(start); end.setDate(start.getDate() + 6);
+    currentRange.textContent = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+  } else if (viewMode === '3day') {
+    start = new Date(currentDate);
+    days = 3;
+    const end = new Date(start); end.setDate(start.getDate() + 2);
+    currentRange.textContent = `${start.toLocaleDateString()} - ${end.toLocaleDateString()}`;
+  } else {
+    start = new Date(currentDate);
+    days = 1;
+    currentRange.textContent = start.toDateString();
+  }
 
-    const cell=document.createElement("div");
-    cell.className=viewMode=="month"?"day-cell":"col";
-    const dayTasks=tasks.filter(t=>t.due==d.toISOString().slice(0,10));
+  const grid = document.createElement('div');
+  grid.className = viewMode === 'month' ? 'grid' : 'flex';
 
-    // Create date header
-    const dateHeader=document.createElement("div");
-    dateHeader.className="day-number";
+  for (let i = 0; i < days; i++) {
+    const d = new Date(start);
+    d.setDate(start.getDate() + i);
+    const cell = document.createElement('div');
+    cell.className = viewMode === 'month' ? 'day-cell' : 'col';
 
-    if(viewMode=="month"){
-      // Show only number in month view
-      dateHeader.textContent = d.getDate();
-    } else {
-      // Show weekday + date (e.g. Tuesday 5 October)
-      const weekday = d.toLocaleDateString('default', { weekday:'long' });
-      const day = d.getDate();
-      const month = d.toLocaleDateString('default', { month:'long' });
-      dateHeader.textContent = `${weekday} ${day} ${month}`;
-    }
+    const hdr = document.createElement('div');
+    hdr.className = 'day-number';
+    hdr.textContent = viewMode === 'month' ? d.getDate() : formatFullDate(d);
+    cell.appendChild(hdr);
 
-    cell.appendChild(dateHeader);
+   const dayStr = d.toLocaleDateString('en-CA');
+const dayTasks = tasks.filter(t => t.due === dayStr);
 
-    if(viewMode=="month"){
-      // Month view dots
-      const dots=document.createElement("div");
-      dots.className="day-dots";
-      dayTasks.forEach(t=>{
-        const dot=document.createElement("div");
-        dot.className="dot";
-        dot.style.background=courses[t.courseId]?.color || "#777";
-        dots.appendChild(dot);
+    if (viewMode === 'month') {
+      const container = document.createElement('div');
+      container.style.display = 'flex';
+      container.style.flexDirection = 'column';
+      container.style.gap = '4px';
+
+      dayTasks.forEach(t => {
+        const item = document.createElement('div');
+        item.style.display = 'flex';
+        item.style.alignItems = 'center';
+        item.style.gap = '4px';
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.style.background = courses[t.courseId]?.color || '#777';
+        const label = document.createElement('small');
+        label.style.fontSize = '10px';
+        label.textContent = courses[t.courseId]?.name || '';
+        item.appendChild(dot);
+        item.appendChild(label);
+        container.appendChild(item);
       });
-      cell.appendChild(dots);
-      cell.addEventListener("click",()=>openDayTasksModal(d,dayTasks));
+
+      cell.appendChild(container);
+      cell.addEventListener('click', () => openDayModal(d, dayTasks));
     } else {
-      // Full tasks for non-month views
-      dayTasks.forEach(t=>{
-        const div=document.createElement("div");
-        div.className="task-row";
-        const icon=document.createElement("span");
-        icon.className="icon";
-        icon.style.background=courses[t.courseId]?.color || "#777";
-        div.appendChild(icon);
-        const text=document.createElement("div");
-        text.textContent=t.title;
-        div.appendChild(text);
-        div.addEventListener("click",()=>openEditModal(t));
-        cell.appendChild(div);
+      dayTasks.forEach(t => {
+        const row = document.createElement('div');
+        row.className = 'task-row';
+        row.style.flexDirection = 'column';
+        row.style.alignItems = 'flex-start';
+        const iconRow = document.createElement('div');
+        iconRow.style.display = 'flex';
+        iconRow.style.alignItems = 'center';
+        iconRow.style.gap = '6px';
+        const icon = document.createElement('span');
+        icon.className = 'icon';
+        icon.style.background = courses[t.courseId]?.color || '#777';
+        const courseName = document.createElement('small');
+        courseName.textContent = courses[t.courseId]?.name || '';
+        iconRow.appendChild(icon);
+        iconRow.appendChild(courseName);
+
+        const title = document.createElement('div');
+        title.textContent = t.title;
+
+        row.appendChild(iconRow);
+        row.appendChild(title);
+        row.addEventListener('click', () => openEdit(t));
+        cell.appendChild(row);
       });
     }
 
@@ -423,40 +411,106 @@ function renderCalendar(){
 }
 
 
-  function renderTaskList(){
-    const sorted=[...tasks].sort((a,b)=>a.due.localeCompare(b.due));
-    taskListEl.innerHTML="";
-    sorted.forEach(t=>{
-      const el=document.createElement("div");
-      el.className="task-row";
-      const icon=document.createElement("span");
-      icon.className="icon";
-      icon.style.background=courses[t.courseId]?.color||"#777";
-      const text=document.createElement("div");
-      text.textContent=`${t.title} - ${t.due}`;
-      el.appendChild(icon); el.appendChild(text);
-      el.addEventListener("click",()=>openEditModal(t));
-      taskListEl.appendChild(el);
-    });
+function renderTaskList(){
+  taskItems.innerHTML = '';
+  const sorted = [...tasks].sort((a,b)=> a.due.localeCompare(b.due));
+  if(sorted.length === 0){
+    taskItems.innerHTML = '<div class="small muted">No tasks yet — add one above</div>';
+    return;
   }
+  sorted.forEach(t=>{
+    const row = document.createElement('div');
+    row.className = 'task-row';
+
+    const icon = document.createElement('span');
+    icon.className = 'icon';
+    icon.style.background = courses[t.courseId]?.color || '#777';
+
+    // 🔥 Format the date from YYYY-MM-DD to DD-MM-YYYY
+    const [year, month, day] = t.due.split('-');
+    const formattedDate = `${day}-${month}-${year}`;
+
+    const text = document.createElement('div');
+    text.textContent = `${t.title} — ${formattedDate}`;
+
+    row.appendChild(icon);
+    row.appendChild(text);
+    row.addEventListener('click', ()=> openEdit(t));
+    taskItems.appendChild(row);
+  });
+}
 
   function render(){
     renderCalendar();
     renderTaskList();
   }
 
-  async function loadData(){
-    const courseSnap = await getDocs(collection(db,"courses"));
-    courses = {};
-    courseSnap.forEach(docu => courses[docu.id]=docu.data());
-    updateCourseSelects();
-    const taskSnap = await getDocs(collection(db,"tasks"));
-    tasks = [];
-    taskSnap.forEach(docu => tasks.push({id:docu.id, ...docu.data()}));
-    render();
+  // ----- open day modal -----
+  function openDayModal(date, dayTasks){
+    const title = document.getElementById('day-modal-title');
+    const list = document.getElementById('day-modal-list');
+    title.textContent = `Tasks for ${date.toLocaleDateString()}`;
+    list.innerHTML = '';
+    if(dayTasks.length === 0){
+      list.innerHTML = '<div class="small muted">No tasks</div>';
+    } else {
+      dayTasks.forEach(t => {
+        const el = document.createElement('div'); el.className = 'task-row';
+        const icon = document.createElement('span'); icon.className='icon'; icon.style.background = courses[t.courseId]?.color || '#777';
+        const txt = document.createElement('div'); txt.textContent = `${t.title} • ${courses[t.courseId]?.name || ''}`;
+        el.appendChild(icon); el.appendChild(txt);
+        el.addEventListener('click', ()=> openEdit(t));
+        list.appendChild(el);
+      });
+    }
+    dayModal.style.display = 'flex';
   }
 
+  // ----- open edit modal for a task -----
+  function openEdit(task){
+    editingTask = task;
+    document.getElementById('edit-title').value = task.title || '';
+    document.getElementById('edit-date').value = task.due || '';
+    document.getElementById('edit-course').value = task.courseId || '';
+    editModal.style.display = 'flex';
+  }
+
+  async function saveEdit(){
+    if(!editingTask) return;
+    try {
+      const ref = doc(db, 'tasks', editingTask.id);
+      const newTitle = document.getElementById('edit-title').value.trim();
+      const newDue = document.getElementById('edit-date').value;
+      const newCourse = document.getElementById('edit-course').value;
+
+      if (!newTitle || !newDue || !newCourse) return alert('Fill all fields');
+
+      const payload = { title: newTitle, due: newDue, courseId: newCourse, uid: userId };
+      await updateDoc(ref, payload);
+
+      // Update task in local array
+      tasks = tasks.map(t => t.id === editingTask.id ? { ...t, ...payload } : t);
+
+      editingTask = null;
+      editModal.style.display = 'none';
+      render();
+    } catch (err) {
+      console.error('Save edit failed', err);
+      alert('Failed to update task: ' + (err.message || err));
+    }
+  }
+
+
+  function changeRange(dir){
+    if(viewMode === 'month') currentDate.setMonth(currentDate.getMonth() + dir);
+    else currentDate.setDate(currentDate.getDate() + (viewMode === 'week' ? 7 : (viewMode === '3day' ? 3 : 1)) * dir);
+    renderCalendar();
+  }
+
+  // initial render & load
+  renderCalendar();
   loadData();
+
 </script>
 </body>
 </html>
