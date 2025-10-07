@@ -249,29 +249,33 @@ onAuthStateChanged(auth, user => {
 
 
   // ----- add course -----
-  async function addCourse(){
-    const name = document.getElementById('course-name').value.trim();
-    const color = document.getElementById('course-color').value;
-    if(!name) return alert('Enter a course name');
-    try{
-      const payload = {
-  title,
-  due,
-  courseId,
-  uid: userId,
-  notes: '' // Add this line
-};
-      const ref = await addDoc(collection(db,'courses'), payload);
-      // update local state (optimistic)
-      courses[ref.id] = payload;
-      document.getElementById('course-name').value = '';
-      updateCourseSelects();
-      renderCourseList();
-    }catch(err){
-      console.error('Add course failed', err);
-      alert('Failed to add course: ' + (err.message || err));
-    }
+async function addCourse() {
+  const name = document.getElementById('course-name').value.trim();
+  const color = document.getElementById('course-color').value;
+
+  if (!name) return alert('Enter a course name');
+
+  try {
+    const payload = {
+      name,
+      color,
+      uid: userId
+    };
+
+    const ref = await addDoc(collection(db, 'courses'), payload);
+
+    // update local state
+    courses[ref.id] = payload;
+    document.getElementById('course-name').value = '';
+
+    updateCourseSelects();
+    renderCourseList();
+  } catch (err) {
+    console.error('Add course failed', err);
+    alert('Failed to add course: ' + (err.message || err));
   }
+}
+
 
   // ----- delete course (and its tasks) -----
   async function deleteCourse(id){
